@@ -19,6 +19,10 @@ import { reportStorageEstimate } from './storageEstimate';
 import { IPerfumeOptions } from './types';
 import { roundByFour } from './utils';
 import { getVitalsScore } from './vitalsScore';
+import {
+  setUserJourneyFinalStepsMap,
+  setUserJourneyStepsMap,
+} from './userJourneyMap';
 
 let ntbtTimeoutID = 0;
 
@@ -28,6 +32,11 @@ export default class Perfume {
   constructor(options: IPerfumeOptions = {}) {
     // Extend default config with external options
     config.analyticsTracker = options.analyticsTracker;
+    config.userJourneySteps = options.userJourneySteps;
+    config.userJourneys = options.userJourneys;
+    config.journeyMaxOutlierThreshold = options.journeyMaxOutlierThreshold;
+    config.onMarkJourney = options.onMarkJourney;
+    config.getTimeSinceStartup = options.getTimeSinceStartup;
     config.isResourceTiming = !!options.resourceTiming;
     config.isElementTiming = !!options.elementTiming;
     config.maxTime = options.maxMeasureTime || config.maxTime;
@@ -66,6 +75,12 @@ export default class Perfume {
     // Let's estimate our storage capacity
     if (WN && WN.storage && typeof WN.storage.estimate === 'function') {
       WN.storage.estimate().then(reportStorageEstimate);
+    }
+
+    // initializing User Journeys if present
+    if(config.userJourneys && config.userJourneySteps){
+      setUserJourneyStepsMap();
+      setUserJourneyFinalStepsMap();
     }
   }
 

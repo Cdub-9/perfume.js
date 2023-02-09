@@ -19,3 +19,8 @@ export const pushTask = (cb: any): void => {
     cb();
   }
 };
+
+export function getJourneyMarkName(mark: string): string {
+  return `user_journey_mark.${mark}`;
+}
+

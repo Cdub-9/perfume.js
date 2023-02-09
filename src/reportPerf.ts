@@ -13,6 +13,7 @@ export const reportPerf = (
   rating: IVitalsScore,
   attribution: object,
   navigationType?: INavigationType,
+  category?: string,
 ): void => {
   pushTask(() => {
     if (!config.analyticsTracker) {
@@ -30,6 +31,7 @@ export const reportPerf = (
       navigatorInformation: getNavigatorInfo(),
       rating,
       navigationType,
+      category,
     });
   });
 };

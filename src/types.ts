@@ -72,6 +72,7 @@ export interface IAnalyticsTrackerOptions {
   navigatorInformation: INavigatorInfo;
   rating: IVitalsScore;
   navigationType?: INavigationType;
+  category?: string;
 }
 
 interface WebVitalsReportOptions {
@@ -89,6 +90,11 @@ export interface IPerfumeConfig {
   isElementTiming: boolean;
   // Analytics
   analyticsTracker?: (options: IAnalyticsTrackerOptions) => void;
+  userJourneys?: UserJourneyConfig;
+  userJourneySteps?: UserJourneyStepsConfig;
+  journeyMaxOutlierThreshold?: number;
+  onMarkJourney?: (mark: string, steps: string[]) => void;
+  getTimeSinceStartup?: GetTimeSinceStartup;
   // Logging
   maxTime: number;
   // web-vitals report options
@@ -101,6 +107,11 @@ export interface IPerfumeOptions {
   elementTiming?: boolean;
   // Analytics
   analyticsTracker?: (options: IAnalyticsTrackerOptions) => void;
+  userJourneys?: UserJourneyConfig;
+  userJourneySteps?: UserJourneyStepsConfig;
+  journeyMaxOutlierThreshold?: number;
+  onMarkJourney?: (mark: string, steps: string[]) => void;
+  getTimeSinceStartup?: GetTimeSinceStartup;
   // Logging
   maxMeasureTime?: number;
   // web-vitals report options
@@ -209,9 +220,52 @@ export type IPerfumeData =
 
 export type IVitalsScore = 'good' | 'needsImprovement' | 'poor' | null;
 
+export type GetTimeSinceStartup = () => Promise<number>;
+
+
 export type INavigationType =
   | 'navigate'
   | 'reload'
   | 'back-forward'
   | 'back-forward-cache'
   | 'prerender';
+
+
+  export type VitalsThresholds = {
+    vitalsThresholds: [number, number];
+  };
+  export type OutlierThreshold = {
+    maxOutlierThreshold: number;
+  };
+  
+  export enum ThresholdTier {
+    instant = 'instant',
+    quick = 'quick',
+    moderate = 'moderate',
+    slow = 'slow',
+    unavoidable = 'unavoidable',
+  }
+    
+  export enum Rating {
+    good = 'good',
+    needs_improvement = 'needs_improvement',
+    poor = 'poor',
+  }
+  
+  export type UserJourneyThresholdConfig = VitalsThresholds & OutlierThreshold;
+  export type UserJourneyThresholds = {
+    [key in ThresholdTier]: UserJourneyThresholdConfig;
+  };
+  
+  export type UserJourney<Steps extends string> = {
+    steps: Steps[];
+  } & Partial<OutlierThreshold>;
+  
+  export type StepMarks<Marks extends string> = { marks: [Marks | 'launch', Marks] };
+  
+  export type StepConfig<Marks extends string> = { threshold: ThresholdTier } & StepMarks<Marks>;
+  
+  export type UserJourneyConfig = Record<string, UserJourney<string>>;
+  
+  export type UserJourneyStepsConfig = Record<string, StepConfig<string>>;
+  
